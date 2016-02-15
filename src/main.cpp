@@ -128,10 +128,8 @@ int main (int argc, const char * argv[]) {
     chip8.Initialize(randSeed);
 
     // load program
-    if (!chip8.LoadProgram(argv[1])) {
-        std::fprintf(stderr, "Failed to load program {%s}.\n", argv[1]);
+    if (!chip8.LoadProgram(argv[1]))
         return 1;
-    }
     std::printf("Loaded program: %s\n", argv[1]);
 
 	// initalize SDL
@@ -230,16 +228,29 @@ int main (int argc, const char * argv[]) {
 
 		// emulate chip8
 		{
+			if (false) {
+				std::printf(
+					" 0x%04X->0x%02X%02X\n",
+					chip8.m_pc,
+					uint8_t(chip8.m_memory[chip8.m_pc]),
+					uint8_t(chip8.m_memory[chip8.m_pc + 1])
+				);
+			}
+
 			uint16_t pcPre = chip8.m_pc;
 			chip8.EmulateCycle();
 
-			if (pcPre == chip8.m_pc) {
-				std::printf(
-					"\nHalted on opcode {0x%04X} at pc {0x%04X}.\n",
-					chip8.m_opcode,
-					chip8.m_pc
-				);
-				readyToQuit = true;
+			// halt-checking; but some programs jmp pc deliberately
+			// and opcodes like 0xFX0A wait to advance, too.
+			if (false) {
+				if (pcPre == chip8.m_pc) {
+					std::printf(
+						"\nHalted on opcode {0x%04X} at pc {0x%04X}.\n",
+						chip8.m_opcode,
+						chip8.m_pc
+					);
+					readyToQuit = true;
+				}
 			}
 		}
 
