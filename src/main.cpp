@@ -30,25 +30,46 @@ int main (int argc, const char * argv[]) {
     }
 
     // dump program head
-    /*
     const unsigned lines = 10;
     for (unsigned i = 0; i < lines; ++i) {
-        std::printf(" 0x%02X%02X  0x%04X    0x%04X  0x%04X\n",
-            ops[0], ops[1], ops[1], ops[2], ops[3]
+        uint8_t * prog = c.m_memory + c.s_progRomRamBegin + i*4*2;
+        std::printf(" 0x%02X%02X  0x%02X%02X    0x%02X%02X  0x%02X%02X\n",
+            prog[0], prog[1],
+            prog[2], prog[3],
+            prog[4], prog[5],
+            prog[6], prog[7]
         );
     }
-    */
 
     // emulate
-    const unsigned cycleCount = unsigned(std::atoi(argv[2]));
-    std::printf("Emulating %u cycles...\n", cycleCount);
-    for (unsigned i = 0; i < cycleCount; ++i) {
+    const unsigned cycleCountTarget = unsigned(std::atoi(argv[2]));
+    std::printf("Emulating %u cycles...\n", cycleCountTarget);
+    for (unsigned cycle = 0; cycle < cycleCountTarget; ++cycle) {
+        uint16_t pcPre = c.m_pc;
         c.EmulateCycle();
 
-        std::printf("Ran opcode 0x%04X\n", c.m_opcode);
-        std::printf("  pc:\t0x%04X\n", c.m_pc);
+        const char * format = nullptr;
+        switch (cycle % 4) {
+            case 0: format = " 0x%04X->0x%04X";    break;
+            case 1: format = "  0x%04X->0x%04X";   break;
+            case 2: format = "    0x%04X->0x%04X"; break;
+            case 3: format = "  0x%04X->0x%04X\n";   break;
+        }
+        std::printf(format, pcPre, c.m_opcode);
+
+        /*
+        if (pcPre == c.m_pc) {
+            std::printf(
+                "\nHalted on opcode {0x%04X} at pc {0x%04X}.\n",
+                c.m_opcode,
+                c.m_pc
+            );
+            return 1;
+        }
+        //*/
     }
 
+    std::printf("\n"); // just in case we were still printing a table
 	return 0;
 
 }
