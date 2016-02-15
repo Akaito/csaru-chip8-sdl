@@ -150,10 +150,81 @@ int main (int argc, const char * argv[]) {
 
 				case SDL_KEYDOWN: {
 					switch (e.key.keysym.sym) {
-						case SDLK_q:
 						case SDLK_ESCAPE: readyToQuit = true; break;
+
+						case SDLK_1:
+						case SDLK_7: chip8.m_keyStates[0x1] = 1; break;
+						case SDLK_2:
+						case SDLK_8: chip8.m_keyStates[0x2] = 1; break;
+						case SDLK_3:
+						case SDLK_9: chip8.m_keyStates[0x3] = 1; break;
+						case SDLK_4:
+						case SDLK_0: chip8.m_keyStates[0xC] = 1; break;
+						case SDLK_q:
+						case SDLK_u: chip8.m_keyStates[0x4] = 1; break;
+						case SDLK_w:
+						case SDLK_i: chip8.m_keyStates[0x5] = 1; break;
+						case SDLK_e:
+						case SDLK_o: chip8.m_keyStates[0x6] = 1; break;
+						case SDLK_r:
+						case SDLK_p: chip8.m_keyStates[0xD] = 1; break;
+						case SDLK_a:
+						case SDLK_j: chip8.m_keyStates[0x7] = 1; break;
+						case SDLK_s:
+						case SDLK_k: chip8.m_keyStates[0x8] = 1; break;
+						case SDLK_d:
+						case SDLK_l: chip8.m_keyStates[0x9] = 1; break;
+						case SDLK_f:
+						case SDLK_SEMICOLON: chip8.m_keyStates[0xE] = 1; break;
+						case SDLK_z:
+						case SDLK_m: chip8.m_keyStates[0xA] = 1; break;
+						case SDLK_x:
+						case SDLK_COMMA: chip8.m_keyStates[0x0] = 1; break;
+						case SDLK_c:
+						case SDLK_PERIOD: chip8.m_keyStates[0xB] = 1; break;
+						case SDLK_v:
+						case SDLK_SLASH: chip8.m_keyStates[0xF] = 1; break;
 					}
 				} break;
+
+				case SDL_KEYUP: {
+					switch (e.key.keysym.sym) {
+						case SDLK_ESCAPE: readyToQuit = true; break;
+
+						case SDLK_1:
+						case SDLK_7: chip8.m_keyStates[0x1] = 0; break;
+						case SDLK_2:
+						case SDLK_8: chip8.m_keyStates[0x2] = 0; break;
+						case SDLK_3:
+						case SDLK_9: chip8.m_keyStates[0x3] = 0; break;
+						case SDLK_4:
+						case SDLK_0: chip8.m_keyStates[0xC] = 0; break;
+						case SDLK_q:
+						case SDLK_u: chip8.m_keyStates[0x4] = 0; break;
+						case SDLK_w:
+						case SDLK_i: chip8.m_keyStates[0x5] = 0; break;
+						case SDLK_e:
+						case SDLK_o: chip8.m_keyStates[0x6] = 0; break;
+						case SDLK_r:
+						case SDLK_p: chip8.m_keyStates[0xD] = 0; break;
+						case SDLK_a:
+						case SDLK_j: chip8.m_keyStates[0x7] = 0; break;
+						case SDLK_s:
+						case SDLK_k: chip8.m_keyStates[0x8] = 0; break;
+						case SDLK_d:
+						case SDLK_l: chip8.m_keyStates[0x9] = 0; break;
+						case SDLK_f:
+						case SDLK_SEMICOLON: chip8.m_keyStates[0xE] = 0; break;
+						case SDLK_z:
+						case SDLK_m: chip8.m_keyStates[0xA] = 0; break;
+						case SDLK_x:
+						case SDLK_COMMA: chip8.m_keyStates[0x0] = 0; break;
+						case SDLK_c:
+						case SDLK_PERIOD: chip8.m_keyStates[0xB] = 0; break;
+						case SDLK_v:
+						case SDLK_SLASH: chip8.m_keyStates[0xF] = 0; break;
+					}
+				}
 			}
 		} // end while SDL_PollEvent
 
