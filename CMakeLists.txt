@@ -14,7 +14,7 @@ set(header_files
 #	file if you need finer control over your project.
 include($ENV{CSaruDir}/cmake/CSaru.cmake)
 # Pass the version of your project; it's not related to the CSaruEnviron.
-CSaru_Bin_Console(0.1 "${src_files}" "${header_files}")
+CSaru_Bin_Console(1.5 "${src_files}" "${header_files}")
 
 # Custom stuff hand-edited into this CMakeLists ...
 
@@ -23,4 +23,13 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 CSaru_Depends("chip8")
 CSaru_Depends("csaru-core-cpp")
+
+# The SDL2-finding code below is from
+# http://stackoverflow.com/questions/23850472/how-to-use-sdl2-and-sdl-image-with-cmake
+
+include(FindPkgConfig)
+pkg_search_module(SDL2 REQUIRED sdl2)
+
+include_directories(${SDL2_INCLUDE_DIRS})
+target_link_librariES(${PROJECT_NAME} ${SDL2_LIBRARIES})
 

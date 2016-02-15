@@ -1,10 +1,112 @@
+// NOTE: Much of the SDL code here is taken from Lazy Foo's SDL tutorials at
+// http://lazyfoo.net/tutorials/SDL/
+
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
 
+#ifdef __WIN32__
+#	include <SDL.h>
+#else
+#	include <SDL2/SDL.h>
+#endif
+
 #include <csaru-core-cpp/csaru-core-cpp.h>
 #include <chip8/chip8.hpp>
 
+//=====================================================================
+//
+// Constants and helpers
+//
+//=====================================================================
+
+//=====================================================================
+static const int s_pixelScale   = 20;
+static const int s_screenWidth  = Chip8::s_renderWidth  * s_pixelScale;
+static const int s_screenHeight = Chip8::s_renderHeight * s_pixelScale;
+
+//=====================================================================
+static SDL_Window *   g_window       = nullptr;
+static SDL_Renderer * g_renderer     = nullptr;
+
+static SDL_Rect g_pixelRect = {
+	0,
+	0,
+	s_screenWidth  / Chip8::s_renderWidth,
+	s_screenHeight / Chip8::s_renderHeight
+};
+
+//=====================================================================
+static bool init () {
+
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		std::fprintf(
+			stderr,
+			"SDL failed to initialize.  %s\n",
+			SDL_GetError()
+		);
+		return false;
+	}
+
+	// Create main window.
+	g_window = SDL_CreateWindow(
+		"chip8-sdl",
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		s_screenWidth,
+		s_screenHeight,
+		SDL_WINDOW_SHOWN
+	);
+	if (!g_window) {
+		std::fprintf(
+			stderr,
+			"SDL failed to create a window.  %s\n",
+			SDL_GetError()
+		);
+		return false;
+	}
+
+	// Create renderer for main window.
+	g_renderer = SDL_CreateRenderer(
+		g_window,
+		-1 /* rendering driver index; -1 means first available */,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+	);
+	if (!g_renderer) {
+		std::fprintf(
+			stderr,
+			"SDL failed to create renderer.  %s\n",
+			SDL_GetError()
+		);
+		return false;
+	}
+
+	// Set color used when clearing.
+	SDL_SetRenderDrawColor(g_renderer, 0x00, 0x00, 0x00, 0xFF);
+
+	return true;
+
+}
+
+//=====================================================================
+static void close () {
+
+	// Destroy window
+	SDL_DestroyRenderer(g_renderer);
+	g_renderer = nullptr;
+	SDL_DestroyWindow(g_window);
+	g_window = nullptr;
+
+}
+
+
+//=====================================================================
+//
+// main program
+//
+//=====================================================================
+
+//=====================================================================
 int main (int argc, const char * argv[]) {
 
     std::printf("  --%s--\n", argv[0]);
@@ -14,14 +116,14 @@ int main (int argc, const char * argv[]) {
         return 1;
     }
 
-    // take third param to be random seed; or just use time now
+    // take second param to be random seed; or just use time now
     unsigned randSeed = 0;
-    if (argc >= 4)
-        randSeed = unsigned(atoi(argv[3]));
+    if (argc >= 3)
+        randSeed = unsigned(atoi(argv[2]));
     if (randSeed == 0)
         randSeed = std::time(0);
 
-    // initialize
+    // initialize chip8
     Chip8 c;
     c.Initialize(randSeed);
 
@@ -32,50 +134,56 @@ int main (int argc, const char * argv[]) {
     }
     std::printf("Loaded program: %s\n", argv[1]);
 
-    if (argc < 3) {
-        std::fprintf(stderr, "Missing second positinal param: cycles to emulate.\n");
-        return 1;
-    }
+	// initalize SDL
+	if (!init())
+		return 1;
 
-    // dump program head
-    const unsigned lines = 10;
-    for (unsigned i = 0; i < lines; ++i) {
-        uint8_t * prog = c.m_memory + c.s_progRomRamBegin + i*4*2;
-        std::printf(" 0x%02X%02X  0x%02X%02X    0x%02X%02X  0x%02X%02X\n",
-            prog[0], prog[1],
-            prog[2], prog[3],
-            prog[4], prog[5],
-            prog[6], prog[7]
-        );
-    }
+	bool readyToQuit = false;
+	SDL_Event e;
 
-    // emulate
-    const unsigned cycleCountTarget = unsigned(std::atoi(argv[2]));
-    std::printf("Emulating %u cycles...\n", cycleCountTarget);
-    for (unsigned cycle = 0; cycle < cycleCountTarget; ++cycle) {
-        uint16_t pcPre = c.m_pc;
-        c.EmulateCycle();
+	while (!readyToQuit) {
+		while (SDL_PollEvent(&e)) {
+			switch (e.type) {
+				case SDL_QUIT: {
+					readyToQuit = true;
+				} break;
 
-        const char * format = nullptr;
-        switch (cycle % 4) {
-            case 0: format = " 0x%04X->0x%04X";    break;
-            case 1: format = "  0x%04X->0x%04X";   break;
-            case 2: format = "    0x%04X->0x%04X"; break;
-            case 3: format = "  0x%04X->0x%04X\n";   break;
-        }
-        std::printf(format, pcPre, c.m_opcode);
+				case SDL_KEYDOWN: {
+					switch (e.key.keysym.sym) {
+						case SDLK_q:
+						case SDLK_ESCAPE: readyToQuit = true; break;
+					}
+				} break;
+			}
+		} // end while SDL_PollEvent
 
-        if (pcPre == c.m_pc) {
-            std::printf(
-                "\nHalted on opcode {0x%04X} at pc {0x%04X}.\n",
-                c.m_opcode,
-                c.m_pc
-            );
-            return 1;
-        }
-    }
+		// emulate chip8
+		{
+			uint16_t pcPre = c.m_pc;
+			c.EmulateCycle();
 
-    std::printf("\n"); // just in case we were still printing a table
+			if (pcPre == c.m_pc) {
+				std::printf(
+					"\nHalted on opcode {0x%04X} at pc {0x%04X}.\n",
+					c.m_opcode,
+					c.m_pc
+				);
+				readyToQuit = true;
+			}
+		}
+
+		// sdl render
+		SDL_SetRenderDrawColor(g_renderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_RenderClear(g_renderer);
+
+		SDL_SetRenderDrawColor(g_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderFillRect(g_renderer, &g_pixelRect);
+
+		SDL_RenderPresent(g_renderer);
+	}
+
+	close();
+
 	return 0;
 
 }
