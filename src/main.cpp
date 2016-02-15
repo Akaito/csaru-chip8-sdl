@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cstdio>
+#include <ctime>
 
 #include <csaru-core-cpp/csaru-core-cpp.h>
 #include <chip8/chip8.hpp>
@@ -13,9 +14,16 @@ int main (int argc, const char * argv[]) {
         return 1;
     }
 
+    // take third param to be random seed; or just use time now
+    unsigned randSeed = 0;
+    if (argc >= 4)
+        randSeed = unsigned(atoi(argv[3]));
+    if (randSeed == 0)
+        randSeed = std::time(0);
+
     // initialize
     Chip8 c;
-    c.Initialize();
+    c.Initialize(randSeed);
 
     // load program
     if (!c.LoadProgram(argv[1])) {
@@ -57,7 +65,6 @@ int main (int argc, const char * argv[]) {
         }
         std::printf(format, pcPre, c.m_opcode);
 
-        /*
         if (pcPre == c.m_pc) {
             std::printf(
                 "\nHalted on opcode {0x%04X} at pc {0x%04X}.\n",
@@ -66,7 +73,6 @@ int main (int argc, const char * argv[]) {
             );
             return 1;
         }
-        //*/
     }
 
     std::printf("\n"); // just in case we were still printing a table
