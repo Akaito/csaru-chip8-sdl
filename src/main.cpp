@@ -124,11 +124,11 @@ int main (int argc, const char * argv[]) {
         randSeed = std::time(0);
 
     // initialize chip8
-    Chip8 c;
-    c.Initialize(randSeed);
+    Chip8 chip8;
+    chip8.Initialize(randSeed);
 
     // load program
-    if (!c.LoadProgram(argv[1])) {
+    if (!chip8.LoadProgram(argv[1])) {
         std::fprintf(stderr, "Failed to load program {%s}.\n", argv[1]);
         return 1;
     }
@@ -159,26 +159,41 @@ int main (int argc, const char * argv[]) {
 
 		// emulate chip8
 		{
-			uint16_t pcPre = c.m_pc;
-			c.EmulateCycle();
+			uint16_t pcPre = chip8.m_pc;
+			chip8.EmulateCycle();
 
-			if (pcPre == c.m_pc) {
+			if (pcPre == chip8.m_pc) {
 				std::printf(
 					"\nHalted on opcode {0x%04X} at pc {0x%04X}.\n",
-					c.m_opcode,
-					c.m_pc
+					chip8.m_opcode,
+					chip8.m_pc
 				);
 				readyToQuit = true;
 			}
 		}
 
 		// sdl render
-		SDL_SetRenderDrawColor(g_renderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_RenderClear(g_renderer);
+		if (chip8.m_drawFlag) {
+			chip8.m_drawFlag = false;
 
-		SDL_SetRenderDrawColor(g_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderFillRect(g_renderer, &g_pixelRect);
+			SDL_SetRenderDrawColor(g_renderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_RenderClear(g_renderer);
 
+			for (unsigned y = 0; y < chip8.s_renderHeight; ++y) {
+				for (unsigned x = 0; x < chip8.s_renderWidth; ++x) {
+					if (chip8.m_renderOut[y * chip8.s_renderWidth + x])
+						SDL_SetRenderDrawColor(g_renderer, 0xEF, 0xEF, 0xEF, 0xFF);
+					else
+						SDL_SetRenderDrawColor(g_renderer, 0x40, 0x40, 0x40, 0x00);
+
+					g_pixelRect.x = x * s_pixelScale;
+					g_pixelRect.y = y * s_pixelScale;
+					SDL_RenderFillRect(g_renderer, &g_pixelRect);
+				}
+			}
+		}
+
+		// note: also using vsync as our frame limiter for now
 		SDL_RenderPresent(g_renderer);
 	}
 
