@@ -71,7 +71,8 @@ static bool init () {
 	g_renderer = SDL_CreateRenderer(
 		g_window,
 		-1 /* rendering driver index; -1 means first available */,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+		//SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+		SDL_RENDERER_ACCELERATED
 	);
 	if (!g_renderer) {
 		std::fprintf(
@@ -277,6 +278,7 @@ int main (int argc, const char * argv[]) {
 		}
 
 		// note: also using vsync as our frame limiter for now
+		SDL_Delay(27);
 		SDL_RenderPresent(g_renderer);
 	}
 
