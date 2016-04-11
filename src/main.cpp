@@ -5,14 +5,15 @@
 #include <cstdio>
 #include <ctime>
 
-#ifdef __WIN32__
+#ifdef WIN32
 #	include <SDL.h>
+#   undef main
 #else
 #	include <SDL2/SDL.h>
 #endif
 
 #include <csaru-core-cpp/csaru-core-cpp.h>
-#include <chip8/chip8.hpp>
+#include <csaru-chip8/chip8.hpp>
 
 //=====================================================================
 //
@@ -121,7 +122,7 @@ int main (int argc, const char * argv[]) {
     if (argc >= 3)
         randSeed = unsigned(atoi(argv[2]));
     if (randSeed == 0)
-        randSeed = std::time(0);
+        randSeed = static_cast<unsigned>(std::time(0));
 
     // initialize chip8
     Chip8 chip8;

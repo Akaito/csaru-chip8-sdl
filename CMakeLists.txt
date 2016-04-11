@@ -21,12 +21,13 @@ CSaru_Bin_Console(1.5 "${src_files}" "${header_files}")
 set(CXX_STANDARD_REQUIRED true)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
-CSaru_Depends("chip8")
+CSaru_Depends("csaru-chip8")
 CSaru_Depends("csaru-core-cpp")
 
 # The SDL2-finding code below is from
 # http://stackoverflow.com/questions/23850472/how-to-use-sdl2-and-sdl-image-with-cmake
 
+#include(FindSDL)
 include(FindPkgConfig)
 pkg_search_module(SDL2 REQUIRED sdl2)
 
