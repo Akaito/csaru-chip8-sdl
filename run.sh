@@ -29,10 +29,10 @@ progfile=IBM\ Logo.ch8
 #progfile=Tank.ch8
 
 
-#progpath=~/chip8/roms/
+progpath=~/chip8/roms/
 
 #progfile=minimal.ch8
-#progfile=pong-story.com/UFO
+progfile=pong-story.com/UFO
 #progfile=pong-story.com/BLINKY
 
 csaru-chip8-sdl "${progpath}${progfile}"
