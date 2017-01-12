@@ -9,5 +9,9 @@
 # Note! ld is sensitive to the order these appear in.  Base-most goes last.
 CSARU_DEPENDS = csaru-chip8 csaru-core-cpp
 
+# CSaruEnv Makefiles append to variables like LDLIBS, so we can freely set them
+# up here.
+LDLIBS = -l SDL2
+
 include ../../makefiles/Makefile-executable
 

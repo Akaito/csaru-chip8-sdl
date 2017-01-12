@@ -35,5 +35,5 @@ progpath=~/chip8/roms/
 progfile=pong-story.com/UFO
 #progfile=pong-story.com/BLINKY
 
-csaru-chip8-sdl "${progpath}${progfile}"
+./csaru-chip8-sdl "${progpath}${progfile}"
 

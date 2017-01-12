@@ -14,12 +14,7 @@ Release
 *.d
 *.o
 *.a
-
-# CMake
-CMakeFiles
-CMakeCache.txt
-cmake_install.cmake
-install_manifest.txt
+csaru-chip8-sdl
 
 # Python
 __pycache__
